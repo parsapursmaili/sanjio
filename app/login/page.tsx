@@ -286,7 +286,7 @@ export default function AuthPage() {
             {/* محتوای روی برند */}
             <div className="relative z-10 flex h-full flex-col justify-between p-12 text-white">
               <div className="text-lg font-black tracking-widest opacity-80">
-                SANJIYO
+                SANJIO
               </div>
 
               <div className="space-y-8">

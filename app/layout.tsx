@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Sanjiyo",
+  title: "Sanjio",
   description: "Iran's unified exam platform",
 };
 
