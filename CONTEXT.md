@@ -33,10 +33,9 @@
 ## 🎨 Design System: Color Palette
 
 **Format:** OKLCH (Tailwind v4)
+_Note: These tokens are configured in `app/globals.css`._
 
 ### 1. Brand Colors (اصلی)
-
-رنگ‌های هویت بصری سنجیو.
 
 | Token         | Light Mode Value       | Dark Mode Value       | Usage                           |
 | :------------ | :--------------------- | :-------------------- | :------------------------------ |
@@ -45,8 +44,6 @@
 | **Accent**    | `oklch(92% 0.04 210)`  | `oklch(30% 0.1 215)`  | هاور (Hover)، آیتم‌های لیست     |
 
 ### 2. Base Colors (زمینه و متن)
-
-رنگ‌های پایه برای ساختار صفحه.
 
 | Token          | Light Mode Value         | Dark Mode Value        | Usage                |
 | :------------- | :----------------------- | :--------------------- | :------------------- |
@@ -58,8 +55,6 @@
 
 ### 3. Semantic States (وضعیت‌های آزمون)
 
-رنگ‌های معنایی برای نمایش درستی/نادرستی پاسخ‌ها.
-
 | Token           | Light Mode Value      | Dark Mode Value       | Usage                  |
 | :-------------- | :-------------------- | :-------------------- | :--------------------- |
 | **Success**     | `oklch(64% 0.19 150)` | `oklch(66% 0.22 150)` | پاسخ صحیح، عملیات موفق |
@@ -67,8 +62,6 @@
 | **Destructive** | `oklch(62% 0.22 25)`  | `oklch(62% 0.24 25)`  | پاسخ غلط، حذف، خطا     |
 
 ### 4. Charts (تحلیل داده)
-
-پالت مخصوص نمودارها و تحلیل عملکرد.
 
 | Token       | Value (Adaptive)      | Description              |
 | :---------- | :-------------------- | :----------------------- |
@@ -85,3 +78,81 @@
 | **Border** | `oklch(88% 0.018 235)` | `oklch(24% 0.05 235)` |
 | **Input**  | `oklch(92% 0.018 235)` | `oklch(24% 0.05 235)` |
 | **Ring**   | `oklch(62% 0.19 220)`  | `oklch(68% 0.22 220)` |
+
+---
+
+## 🗄️ Database Schema (Supabase/PostgreSQL)
+
+```sql
+-- Profiles (Linked to Auth)
+CREATE TABLE public.profiles (
+  id uuid NOT NULL REFERENCES auth.users(id),
+  email text NOT NULL UNIQUE,
+  full_name text,
+  role USER-DEFINED DEFAULT 'student'::user_role,
+  avatar_url text,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT profiles_pkey PRIMARY KEY (id)
+);
+
+-- Exams
+CREATE TABLE public.exams (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  creator_id uuid NOT NULL REFERENCES public.profiles(id),
+  title text NOT NULL,
+  description text,
+  start_time timestamp with time zone,
+  end_time timestamp with time zone,
+  duration_minutes integer,
+  type USER-DEFINED DEFAULT 'test'::exam_type,
+  status USER-DEFINED DEFAULT 'draft'::exam_status,
+  price numeric DEFAULT 0,
+  is_featured boolean DEFAULT false,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT exams_pkey PRIMARY KEY (id)
+);
+
+-- Questions
+CREATE TABLE public.questions (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  exam_id uuid NOT NULL REFERENCES public.exams(id),
+  question_text text NOT NULL,
+  options jsonb NOT NULL DEFAULT '[]'::jsonb,
+  correct_option_id integer,
+  score integer DEFAULT 1,
+  order_index integer DEFAULT 0,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT questions_pkey PRIMARY KEY (id)
+);
+
+-- Participations
+CREATE TABLE public.participations (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL REFERENCES public.profiles(id),
+  exam_id uuid NOT NULL REFERENCES public.exams(id),
+  score integer DEFAULT 0,
+  status text DEFAULT 'in_progress'::text,
+  started_at timestamp with time zone DEFAULT now(),
+  finished_at timestamp with time zone,
+  CONSTRAINT participations_pkey PRIMARY KEY (id)
+);
+
+-- Answers
+CREATE TABLE public.answers (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  participation_id uuid NOT NULL REFERENCES public.participations(id),
+  question_id uuid NOT NULL REFERENCES public.questions(id),
+  selected_option_id integer,
+  is_correct boolean,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT answers_pkey PRIMARY KEY (id)
+);
+```
+
+مراحل جلو رفته
+Authentication Core: پیاده‌سازی کامل سیستم ورود/ثبت‌نام در مسیر /login با استفاده از Supabase Auth و Server Actions.
+UI/UX: طراحی صفحه Auth با استایل Glassmorphism، انیمیشن‌های Framer Motion و پشتیبانی از حالت ریسپانسیو (موبایل/دسکتاپ).
+Validation: اعتبارسنجی فرم‌ها با zod و react-hook-form با پیام‌های خطای فارسی و هندلینگ ارورهای سمت سرور.
+Security: تنظیم Middleware برای محافظت از مسیرهای /dashboard و هدایت کاربران احراز هویت نشده.
+Database: اتصال پروژه به Supabase برقرار شده و جداول دیتابیس طبق Schema بالا ایجاد شده‌اند.
