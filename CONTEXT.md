@@ -160,3 +160,23 @@ Database: اتصال پروژه به Supabase برقرار شده و جداول 
 **Profile System:** تکمیل صفحه تنظیمات (/settings) با قابلیت ویرایش اطلاعات و آپلود آواتار به صورت Real-time.
 **Storage & Optimization:** راه‌اندازی Supabase Storage با قوانین امنیتی (RLS) اصلاح‌شده؛ پیاده‌سازی فشرده‌سازی تصویر سمت کلاینت (Canvas API) و استراتژی **Cache Busting** برای مدیریت کش تصاویر.
 **Backend Automation:** تنظیم SQL Triggers برای ایجاد خودکار ردیف پروفایل هنگام ثبت‌نام کاربر جدید.
+Auth: پیاده‌سازی کامل در app/login با استفاده از Supabase Auth و Server Actions.
+Middleware: محافظت از مسیر /dashboard در middleware.ts.
+Triggers: تریگر SQL برای ساخت خودکار ردیف در جدول profiles هنگام ثبت‌نام.
+۲. داشبورد و پروفایل:
+Layout: پیاده‌سازی DashboardShell ریسپانسیو با انیمیشن در app/dashboard/layout.tsx.
+Settings: فرم ویرایش پروفایل و آپلود آواتار (با فشرده‌سازی کلاینت و Cache Busting) در app/dashboard/settings.
+۳. موتور آزمون (Exam Engine):
+Database: فعال‌سازی RLS روی جدول exams برای امنیت داده‌ها.
+Server Actions: هندلینگ ساخت آزمون در app/dashboard/exams/\_actions/exam-actions.ts.
+UI:
+CreateExamDialog: فرم پیشرفته راست‌چین (RTL Native) با Shadcn و Radix برای ساخت آزمون.
+ExamCard: طراحی گلس‌مورفیسم کارت‌ها با وضعیت‌های رنگی در app/dashboard/exams/\_components.
+Page: لیست‌گیری سروری آزمون‌ها در app/dashboard/exams/page.tsx.
+**۴. ماژول پیشرفته طراحی سوال (Question Builder):**
+
+- **مسیر اصلی:** `app/dashboard/exams/[examId]/questions`
+- **معماری فرم:** پیاده‌سازی `QuestionForm` با استفاده از `useFieldArray` برای مدیریت داینامیک گزینه‌ها و `react-hook-form` با اعتبارسنجی دقیق `Zod` (هماهنگ‌سازی تایپ String برای رادیو باتن‌ها).
+- **پشتیبانی ریاضی (LaTeX):** توسعه کامپوننت‌های `MathToolbar` (نوار ابزار فرمول) و `MathRenderer` (موتور KaTeX) برای درج و پیش‌نمایش زنده فرمول‌های ریاضی در متن سوال.
+- **UI/UX:** بازطراحی کامل پنل به صورت **Sheet راست‌چین (RTL)** با هدر و فوتر چسبان (Sticky)، اصلاح چیدمان اینپوت‌ها و بهبود تجربه کاربری در موبایل/دسکتاپ.
+- **Backend & Security:** به‌روزرسانی Schema دیتابیس (افزودن ستون `text`)، رفرش کردن کش API سوپابیس، و تنظیم دقیق **RLS Policies** برای اجازه درج (Insert) سوالات توسط کاربر احراز هویت شده.
