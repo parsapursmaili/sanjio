@@ -48,21 +48,34 @@ export function QuestionForm({
   const [showMath, setShowMath] = useState(false);
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
 
+  // آماده‌سازی مقادیر پیش‌فرض
+  let defaultValues: QuestionFormValues;
+
+  if (initialData) {
+    defaultValues = {
+      text: initialData.question_text || "",
+      score: Number(initialData.score) || 1,
+      options: Array.isArray(initialData.options)
+        ? initialData.options.map((opt: any) => ({
+            text: String(opt.text || ""),
+          }))
+        : [{ text: "" }, { text: "" }, { text: "" }, { text: "" }],
+      correctOptionIndex: String(initialData.correct_option_id ?? "0"),
+    };
+  } else {
+    defaultValues = {
+      text: "",
+      score: 1,
+      options: [{ text: "" }, { text: "" }, { text: "" }, { text: "" }],
+      correctOptionIndex: "0",
+    };
+  }
+
+  // استفاده از as any برای حل مشکل ناسازگاری تایپ Resolver در بیلد
   const form = useForm<QuestionFormValues>({
-    resolver: zodResolver(questionSchema),
-    defaultValues: initialData
-      ? {
-          text: initialData.question_text,
-          score: initialData.score,
-          options: initialData.options.map((opt: any) => ({ text: opt.text })),
-          correctOptionIndex: String(initialData.correct_option_id),
-        }
-      : {
-          text: "",
-          score: 1,
-          options: [{ text: "" }, { text: "" }, { text: "" }, { text: "" }],
-          correctOptionIndex: "0",
-        },
+    resolver: zodResolver(questionSchema) as any,
+    defaultValues,
+    mode: "onChange",
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -70,44 +83,48 @@ export function QuestionForm({
     name: "options",
   });
 
+  // هندل کردن رفرنس تکست‌اریا
+  const { ref: textAreaRegisterRef, ...textAreaRest } = form.register("text");
+
   const onSubmit = (data: QuestionFormValues) => {
     startTransition(async () => {
-      if (initialData) {
-        const payload = {
-          question_text: data.text,
-          score: data.score,
-          options: data.options.map((o) => ({
-            id: crypto.randomUUID(),
-            text: o.text,
-          })),
-          correct_option_id: parseInt(data.correctOptionIndex),
-        };
+      try {
+        if (initialData) {
+          const payload = {
+            question_text: data.text,
+            score: data.score,
+            options: data.options.map((o) => ({
+              id: crypto.randomUUID(),
+              text: o.text,
+            })),
+            correct_option_id: parseInt(data.correctOptionIndex),
+          };
 
-        code;
-        Code;
-        download;
-        content_copy;
-        expand_less;
-        const result = await updateQuestionAction(
-          initialData.id,
-          examId,
-          payload
-        );
-        if (result?.error) {
-          toast.error("خطا در ویرایش", { description: result.error });
+          const result = await updateQuestionAction(
+            initialData.id,
+            examId,
+            payload
+          );
+
+          if (result?.error) {
+            toast.error("خطا در ویرایش", { description: result.error });
+          } else {
+            toast.success("سوال با موفقیت ویرایش شد");
+            onSuccess();
+          }
         } else {
-          toast.success("سوال با موفقیت ویرایش شد");
-          onSuccess();
+          const result = await createQuestionAction(examId, data);
+
+          if (result?.error) {
+            toast.error("خطا در ثبت", { description: result.error });
+          } else {
+            toast.success("سوال با موفقیت ثبت شد");
+            form.reset();
+            onSuccess();
+          }
         }
-      } else {
-        const result = await createQuestionAction(examId, data);
-        if (result?.error) {
-          toast.error("خطا در ثبت", { description: result.error });
-        } else {
-          toast.success("سوال با موفقیت ثبت شد");
-          form.reset();
-          onSuccess();
-        }
+      } catch (error) {
+        toast.error("خطای غیرمنتظره رخ داده است");
       }
     });
   };
@@ -115,12 +132,16 @@ export function QuestionForm({
   const handleInsertMath = (latex: string) => {
     const textarea = textAreaRef.current;
     if (!textarea) return;
+
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     const currentVal = form.getValues("text") || "";
+
     const newVal =
       currentVal.substring(0, start) + latex + currentVal.substring(end);
+
     form.setValue("text", newVal, { shouldValidate: true });
+
     setTimeout(() => {
       textarea.focus();
       let newCursorPos = start + latex.length;
@@ -160,6 +181,7 @@ export function QuestionForm({
               </p>
             </div>
           </div>
+
           <div className="group relative rounded-2xl border bg-card shadow-sm transition-all duration-300 hover:shadow-md focus-within:shadow-xl focus-within:ring-1 focus-within:ring-indigo-500/30 overflow-hidden">
             <AnimatePresence>
               {showMath && (
@@ -177,9 +199,9 @@ export function QuestionForm({
             </AnimatePresence>
 
             <Textarea
-              {...form.register("text")}
+              {...textAreaRest}
               ref={(e) => {
-                form.register("text").ref(e);
+                textAreaRegisterRef(e);
                 textAreaRef.current = e;
               }}
               placeholder="صورت سوال را با دقت بنویسید..."
@@ -223,7 +245,7 @@ export function QuestionForm({
                 <Input
                   type="number"
                   placeholder="1"
-                  {...form.register("score")}
+                  {...form.register("score", { valueAsNumber: true })}
                   className="w-16 h-8 text-center text-lg font-bold border-0 bg-transparent p-0 focus-visible:ring-0 text-indigo-600 placeholder:text-indigo-600/30"
                 />
                 <Trophy className="w-4 h-4 text-amber-500 mb-1" />

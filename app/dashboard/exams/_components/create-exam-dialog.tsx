@@ -35,7 +35,7 @@ import { cn } from "@/lib/utils";
 export function CreateExamDialog() {
   const [isOpen, setIsOpen] = useState(false);
   const [state, action, isPending] = useActionState(createExamAction, {
-    message: null,
+    message: "",
     errors: {},
   });
 

@@ -11,9 +11,8 @@ export const questionSchema = z.object({
       })
     )
     .min(2, "حداقل ۲ گزینه لازم است"),
-  correctOptionIndex: z.string({
-    required_error: "انتخاب گزینه صحیح الزامی است",
-  }),
+  // اصلاح شده: حذف required_error و استفاده از min برای اجباری کردن انتخاب
+  correctOptionIndex: z.string().min(1, "انتخاب گزینه صحیح الزامی است"),
 });
 
 export type QuestionFormValues = z.infer<typeof questionSchema>;

@@ -96,3 +96,17 @@ export async function reorderQuestionsAction(
   revalidatePath(`/dashboard/exams/${examId}/questions`);
   return { message: "ترتیب سوالات ذخیره شد." };
 }
+export async function equalizeScoresAction(examId: string) {
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("questions")
+    .update({ score: 1 })
+    .eq("exam_id", examId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath(`/dashboard/exams/${examId}/questions`);
+}
