@@ -184,3 +184,9 @@ Page: لیست‌گیری سروری آزمون‌ها در app/dashboard/exams/
   مدیریت نمرات: پیاده‌سازی سیستم نمره منفی (Schema Update + UI Toggle) و ابزار یکسان‌سازی نمرات با Server Action اختصاصی.
   پایداری Drag & Drop: رفع تداخل startTransition در جابه‌جایی سوالات و افزودن انیمیشن‌های لیست با dnd-kit.
   رابط کاربری نهایی: بازطراحی مدرن صفحه سوالات با کارت‌های آماری هوشمند، هدرهای گرادینت و اصلاح کامل چیدمان RTL در کامپوننت‌های کنترلی.
+  زیرساخت عمومی: ایجاد صفحه لیست آزمون‌ها (app/exam/page.tsx) و لابی آزمون (app/(exam)/exams/[examId]/page.tsx) با طراحی Glassmorphism و بررسی هوشمند وضعیت کاربر (شروع/ادامه/پایان).
+  هسته فنی آزمون: پیاده‌سازی ExamSession در مسیر app/(exam)/exams/[examId]/take با استفاده از Zustand (store/use-exam-store.ts) برای مدیریت State و ذخیره لوکال پاسخ‌ها (Persist) جهت جلوگیری از حذف دیتا هنگام رفرش.
+  رابط کاربری (Zen Mode): توسعه کامپوننت‌های ExamHeader (تایمر چسبان با react-timer-hook)، QuestionCard (با انیمیشن‌های Framer Motion) و فوتر ناوبری بدون مزاحمت.
+  امنیت و Backend: پیاده‌سازی Server Actionهای امن (exam-take-actions.ts) برای دریافت سوالات بدون ارسال پاسخ صحیح به کلاینت (Sanitization) و اصلاح کوئری‌ها.
+  دیتابیس و RLS: تنظیم دقیق RLS Policies برای جداول participations و answers جهت اجازه ثبت رکورد توسط کاربر و رفع خطاهای دسترسی.
+  مدیریت خطا: جایگزینی صفحه ۴۰۴ با رابط کاربری مدیریت خطا (Graceful Error Handling) برای راهنمایی کاربر در صورت بروز مشکل در مجوز یا دیتابیس.
